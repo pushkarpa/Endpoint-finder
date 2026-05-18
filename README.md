@@ -2,6 +2,12 @@
 
 This bookmarklet scans a webpage and its loaded scripts to extract relative URLs, useful for bug bounty and security research.
 
+
+## Screenshot
+
+![Relative URL Finder Screenshot](relative-url-finder/screenshot.png)
+
+
 ## Usage
 1. Copy the code from `bookmarklet.js`.
 2. Create a new browser bookmark.
