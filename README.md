@@ -11,7 +11,7 @@ This bookmarklet scans a webpage and its loaded scripts to extract relative URLs
    
 ## Features
 
-fix: rewrite as single-line minified bookmarklet for Edge/Chrome compatibility
+## Whats Changed fix: rewrite as single-line minified bookmarklet for Edge/Chrome compatibility
 
 - Fixed bookmarklet not running due to multi-line formatting in browser URL field
 - Replaced loose lookahead regex with a stricter quoted-string URL pattern
