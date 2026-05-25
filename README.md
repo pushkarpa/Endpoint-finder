@@ -1,28 +1,25 @@
-# Relative URL Finder Bookmarklet
+# Relative URL Extractor — Bookmarklet
 
-This bookmarklet scans a webpage and its loaded scripts to extract relative URLs, useful for bug bounty and security research.
+Extract all relative URLs from any webpage instantly.
 
-## Usage
-1. Copy the code from `bookmarklet.js`.
-2. Create a new browser bookmark.
-3. Paste the code into the bookmark’s URL field.
-4. Visit any site and click the bookmark to open the panel.
+## Preview
 
-   
-## Features
+![Relative URL Extractor](assets/screenshot.png)
 
-## Whats Changed fix: rewrite as single-line minified bookmarklet for Edge/Chrome compatibility
+## How to install
 
-- Fixed bookmarklet not running due to multi-line formatting in browser URL field
-- Replaced loose lookahead regex with a stricter quoted-string URL pattern
-- Added isLikelyUrl() filter to cut false positives (assets, short noise strings)
-- Scripts now fetched in parallel via Promise.allSettled() with cache:force-cache
-- Panel now shows immediately after all fetches resolve instead of a fixed 3s timeout
-- Results sorted alphabetically
-- Click any URL row to copy it individually (flashes green on copy)
-- Copy button gives inline feedback instead of alert()
-- Live result count updates as you type in search
-- Dark theme UI with hover states, rounded corners, drop shadow
+1. Copy the script below
+2. Create a new bookmark in your browser
+3. Paste it as the bookmark URL
+4. Click it on any page
 
-## Disclaimer
-For educational and bug bounty purposes only. Use responsibly.
+## Script
+
+javascript:(function(){document.getElementById('urlPanel')?.remove();const results=new Set();const urlRegex=/(?:"|'|`)(\/?[a-zA-Z0-9_\-\/.#?&=%@:+*,;!~()\[\]${}]+)(?:"|'|`)/g;const validPath=/^\/[^\s"'`<>{}|\\^[\]]*$/;function isLikelyUrl(s){if(!validPath.test(s))return false;if(/\.(jpg|jpeg|png|gif|svg|ico|woff|woff2|ttf|eot|mp4|webm|map)$/i.test(s))return false;if(s.length<2||s.length>300)return false;return true;}function extractUrls(text){let m;const r=/(?:"|'|`)(\/?[a-zA-Z0-9_\-\/.#?&=%@:+*,;!~()\[\]${}]+)(?:"|'|`)/g;while((m=r.exec(text))!==null){if(isLikelyUrl(m[1]))results.add(m[1]);}}extractUrls(document.documentElement.outerHTML);const scriptSrcs=[...document.scripts].map(s=>s.src).filter(Boolean);const done=()=>{document.getElementById('urlPanel')?.remove();const panel=Object.assign(document.createElement('div'),{id:'urlPanel'});Object.assign(panel.style,{position:'fixed',top:'50px',left:'50px',width:'420px',height:'520px',resize:'both',overflow:'hidden',background:'#1e1e2e',color:'#cdd6f4',zIndex:'2147483647',border:'1px solid #45475a',borderRadius:'8px',fontFamily:'monospace',fontSize:'13px',boxSizing:'border-box',display:'flex',flexDirection:'column',boxShadow:'0 8px 32px rgba(0,0,0,0.5)'});const header=document.createElement('div');Object.assign(header.style,{background:'#313244',padding:'8px 10px',cursor:'move',display:'flex',justifyContent:'space-between',alignItems:'center',borderRadius:'8px 8px 0 0',flexShrink:'0',userSelect:'none'});const title=document.createElement('span');title.innerHTML='<b>Relative URLs</b> <span style="color:#a6adc8;font-size:11px">('+results.size+' found)</span>';const btnStyle='padding:3px 8px;font-size:12px;cursor:pointer;background:#45475a;color:#cdd6f4;border:none;border-radius:4px;';const btns=document.createElement('div');btns.style.cssText='display:flex;gap:6px;align-items:center;';const copyBtn=Object.assign(document.createElement('button'),{textContent:'Copy'});copyBtn.style.cssText=btnStyle;copyBtn.onclick=()=>navigator.clipboard.writeText([...results].join('\n')).then(()=>{copyBtn.textContent='Copied!';setTimeout(()=>copyBtn.textContent='Copy',1500);});const saveBtn=Object.assign(document.createElement('button'),{textContent:'Export'});saveBtn.style.cssText=btnStyle;saveBtn.onclick=()=>{const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([[...results].join('\n')],{type:'text/plain'})),download:'relative-urls.txt'});a.click();};const closeBtn=Object.assign(document.createElement('button'),{textContent:'X'});closeBtn.style.cssText=btnStyle+'color:#f38ba8;';closeBtn.onclick=()=>panel.remove();btns.append(copyBtn,saveBtn,closeBtn);header.append(title,btns);const search=Object.assign(document.createElement('input'),{placeholder:'Search (supports * wildcards, space = AND)'});Object.assign(search.style,{margin:'8px',padding:'6px 8px',fontFamily:'monospace',fontSize:'13px',boxSizing:'border-box',width:'calc(100% - 16px)',background:'#313244',color:'#cdd6f4',border:'1px solid #45475a',borderRadius:'4px',outline:'none',flexShrink:'0'});const stats=document.createElement('div');Object.assign(stats.style,{padding:'0 8px 4px',fontSize:'11px',color:'#a6adc8',flexShrink:'0'});stats.textContent=results.size+' total';const list=document.createElement('div');Object.assign(list.style,{overflow:'auto',flex:'1',padding:'0 8px 8px'});const items=[...results].sort().map(url=>{const row=document.createElement('div');Object.assign(row.style,{padding:'3px 6px',borderRadius:'4px',cursor:'pointer',wordBreak:'break-all',lineHeight:'1.5'});row.textContent=url;row.title='Click to copy';row.onmouseenter=()=>row.style.background='#313244';row.onmouseleave=()=>row.style.background='';row.onclick=()=>navigator.clipboard.writeText(url).then(()=>{const p=row.style.color;row.style.color='#a6e3a1';setTimeout(()=>row.style.color=p,800);});list.appendChild(row);return{el:row,text:url};});search.oninput=()=>{const parts=search.value.toLowerCase().trim().split(/\s+/).filter(Boolean);let v=0;items.forEach(({el,text})=>{const show=parts.length===0||parts.every(p=>new RegExp(p.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/\\\*/g,'.*'),'i').test(text));el.style.display=show?'':'none';if(show)v++;});stats.textContent=v+' of '+results.size+' shown';};panel.append(header,search,stats,list);document.body.appendChild(panel);const el=panel,handle=header;let dx=0,dy=0,mx=0,my=0;handle.onmousedown=e=>{e.preventDefault();mx=e.clientX;my=e.clientY;document.onmousemove=e=>{dx=mx-e.clientX;dy=my-e.clientY;mx=e.clientX;my=e.clientY;el.style.top=(el.offsetTop-dy)+'px';el.style.left=(el.offsetLeft-dx)+'px';};document.onmouseup=()=>{document.onmousemove=document.onmouseup=null;};};};if(scriptSrcs.length===0){done();}else{Promise.allSettled(scriptSrcs.map(src=>fetch(src,{cache:'force-cache'}).then(r=>r.ok?r.text():'').then(txt=>extractUrls(txt)))).then(done);}})();
+
+## What's changed in v2
+- Fixed: now works correctly as a bookmarklet in Edge/Chrome
+- Better accuracy with stricter URL filtering
+- Faster: scripts fetched in parallel, no hardcoded delay
+- Click any result to copy it
+- Dark theme UI with live search and result count
