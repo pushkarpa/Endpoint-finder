@@ -4,7 +4,8 @@ Extract all relative URLs from any webpage instantly.
 
 ## Preview
 
-![Relative URL Extractor](https://github.com/pushkarpa/Endpoint-finder/blob/main/Screenshot.png)
+![Relative URL Extractor](https://github.com/pushkarpa/Endpoint-finder/blob/main/Screenshot.png,https://github.com/pushkarpa/Endpoint-finder/blob/main/Screenshot2.png)
+
 
 ## How to install
 
